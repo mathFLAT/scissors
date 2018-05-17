@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -37,6 +38,7 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.ImageView;
+
 import java.io.File;
 import java.io.OutputStream;
 import java.lang.annotation.Retention;
@@ -57,9 +59,11 @@ public class CropView extends ImageView {
     private Matrix transform = new Matrix();
     private Extensions extensions;
 
-    /** Corresponds to the values in {@link com.lyft.android.scissors2.R.attr#cropviewShape} */
+    /**
+     * Corresponds to the values in {@link com.lyft.android.scissors2.R.attr#cropviewShape}
+     */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ Shape.RECTANGLE, Shape.OVAL })
+    @IntDef({Shape.RECTANGLE, Shape.OVAL})
     public @interface Shape {
 
         int RECTANGLE = 0;
@@ -119,15 +123,32 @@ public class CropView extends ImageView {
     }
 
     private void drawSquareOverlay(Canvas canvas) {
-        final int viewportWidth = touchManager.getViewportWidth();
-        final int viewportHeight = touchManager.getViewportHeight();
-        final int left = (getWidth() - viewportWidth) / 2;
-        final int top = (getHeight() - viewportHeight) / 2;
+        final RectF frameRect = touchManager.getFrameRect();
 
-        canvas.drawRect(0, top, left, getHeight() - top, viewportPaint); // left
-        canvas.drawRect(0, 0, getWidth(), top, viewportPaint); // top
-        canvas.drawRect(getWidth() - left, top, getWidth(), getHeight() - top, viewportPaint); // right
-        canvas.drawRect(0, getHeight() - top, getWidth(), getHeight(), viewportPaint); // bottom
+        canvas.drawRect(0, frameRect.top, frameRect.left, frameRect.bottom, viewportPaint); // left
+        canvas.drawRect(0, 0, getWidth(), frameRect.top, viewportPaint); // top
+        canvas.drawRect(frameRect.right, frameRect.top, getWidth(), frameRect.bottom, viewportPaint); // right
+        canvas.drawRect(0, frameRect.bottom, getWidth(), getHeight(), viewportPaint); // bottom
+
+        drawHandles(canvas);
+    }
+
+    private void drawHandles(Canvas canvas) {
+        Paint paint = new Paint();
+        paint.setStrokeWidth(4);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.RED);
+        final RectF frameRect = touchManager.getFrameRect();
+
+        canvas.drawCircle(frameRect.left, frameRect.top, 16, paint);
+        canvas.drawCircle(frameRect.right, frameRect.top, 16, paint);
+        canvas.drawCircle(frameRect.left, frameRect.bottom, 16, paint);
+        canvas.drawCircle(frameRect.right, frameRect.bottom, 16, paint);
+
+        canvas.drawLine(frameRect.left, frameRect.top, frameRect.right, frameRect.top, paint);
+        canvas.drawLine(frameRect.left, frameRect.bottom, frameRect.right, frameRect.bottom, paint);
+        canvas.drawLine(frameRect.left, frameRect.top, frameRect.left, frameRect.bottom, paint);
+        canvas.drawLine(frameRect.right, frameRect.top, frameRect.right, frameRect.bottom, paint);
     }
 
     private void drawOvalOverlay(Canvas canvas) {
@@ -334,8 +355,9 @@ public class CropView extends ImageView {
         final Bitmap dst = Bitmap.createBitmap(viewportWidth, viewportHeight, config);
 
         Canvas canvas = new Canvas(dst);
-        final int left = (getRight() - viewportWidth) / 2;
-        final int top = (getBottom() - viewportHeight) / 2;
+
+        final float left = touchManager.getFrameRect().left;
+        final float top = touchManager.getFrameRect().top;
         canvas.translate(-left, -top);
 
         drawBitmap(canvas);
@@ -425,7 +447,7 @@ public class CropView extends ImageView {
 
         /**
          * Load a {@link Bitmap} using a reference to a {@link BitmapLoader}, you must call {@link LoadRequest#load(Object)} afterwards.
-         *
+         * <p>
          * Please ensure that the library for the {@link BitmapLoader} you reference is available on the classpath.
          *
          * @param loaderType the {@link BitmapLoader} to use to load desired (@link Bitmap}
@@ -463,4 +485,6 @@ public class CropView extends ImageView {
             CropViewExtensions.pickUsing(fragment, requestCode);
         }
     }
+
+
 }

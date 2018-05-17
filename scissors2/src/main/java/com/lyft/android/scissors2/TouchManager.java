@@ -22,6 +22,7 @@ import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.support.annotation.IntDef;
 import android.view.GestureDetector;
@@ -38,6 +39,10 @@ import java.lang.annotation.RetentionPolicy;
 
 class TouchManager {
 
+    private enum TouchArea {
+        OTHER, LEFT_TOP, RIGHT_TOP, LEFT_BOTTOM, RIGHT_BOTTOM
+    }
+
     private static final int MINIMUM_FLING_VELOCITY = 2500;
 
     private final CropViewConfig cropViewConfig;
@@ -45,12 +50,20 @@ class TouchManager {
     private final ScaleGestureDetector scaleGestureDetector;
     private final GestureDetector gestureDetector;
 
+    private TouchArea mTouchArea = TouchArea.OTHER;
+    private float mLastX, mLastY;
+    private int width;
+    private int height;
     private float minimumScale;
     private float maximumScale;
     private Rect imageBounds;
     private float aspectRatio;
     private int viewportWidth;
     private int viewportHeight;
+    private int viewMinWidth = 100;
+    private int viewMinHeight = 100;
+    private RectF frameRect;
+
     private int bitmapWidth;
     private int bitmapHeight;
 
@@ -65,15 +78,13 @@ class TouchManager {
     private final GestureAnimator gestureAnimator = new GestureAnimator(new GestureAnimator.OnAnimationUpdateListener() {
         @Override
         public void onAnimationUpdate(@GestureAnimator.AnimationType int animationType, float animationValue) {
-            if(animationType == GestureAnimator.ANIMATION_X) {
+            if (animationType == GestureAnimator.ANIMATION_X) {
                 position.set(animationValue, position.getY());
                 ensureInsideViewport();
-            }
-            else if(animationType == GestureAnimator.ANIMATION_Y) {
+            } else if (animationType == GestureAnimator.ANIMATION_Y) {
                 position.set(position.getX(), animationValue);
                 ensureInsideViewport();
-            }
-            else if(animationType == GestureAnimator.ANIMATION_SCALE) {
+            } else if (animationType == GestureAnimator.ANIMATION_SCALE) {
                 scale = animationValue;
                 setLimits();
             }
@@ -95,8 +106,14 @@ class TouchManager {
             return true;
         }
 
-        @Override public boolean onScaleBegin(ScaleGestureDetector detector) {return true;}
-        @Override public void onScaleEnd(ScaleGestureDetector detector) {}
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            return true;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+        }
     };
 
     private final GestureDetector.OnGestureListener gestureListener = new GestureDetector.SimpleOnGestureListener() {
@@ -122,14 +139,14 @@ class TouchManager {
             velocityX /= 2;
             velocityY /= 2;
 
-            if(Math.abs(velocityX) < MINIMUM_FLING_VELOCITY) {
+            if (Math.abs(velocityX) < MINIMUM_FLING_VELOCITY) {
                 velocityX = 0;
             }
-            if(Math.abs(velocityY) < MINIMUM_FLING_VELOCITY) {
+            if (Math.abs(velocityY) < MINIMUM_FLING_VELOCITY) {
                 velocityY = 0;
             }
 
-            if(velocityX == 0 && velocityY == 0) {
+            if (velocityX == 0 && velocityY == 0) {
                 return true;
             }
 
@@ -153,7 +170,7 @@ class TouchManager {
             final float fromX, toX, fromY, toY, targetScale;
 
             TouchPoint eventPoint = new TouchPoint(e.getX(), e.getY());
-            if(scale == minimumScale) {
+            if (scale == minimumScale) {
                 targetScale = maximumScale / 2;
                 TouchPoint translatedTargetPosition = mapTouchCoordinateToMatrix(eventPoint, targetScale);
                 TouchPoint centeredTargetPosition = centerCoordinates(translatedTargetPosition);
@@ -161,8 +178,7 @@ class TouchManager {
                 toX = centeredTargetPosition.getX();
                 fromY = position.getY();
                 toY = centeredTargetPosition.getY();
-            }
-            else {
+            } else {
                 targetScale = minimumScale;
                 TouchPoint translatedPosition = mapTouchCoordinateToMatrix(eventPoint, scale);
                 TouchPoint centeredTargetPosition = centerCoordinates(translatedPosition);
@@ -187,7 +203,8 @@ class TouchManager {
         this.imageView = imageView;
         scaleGestureDetector = new ScaleGestureDetector(imageView.getContext(), scaleGestureListener);
         gestureDetector = new GestureDetector(imageView.getContext(), gestureListener);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             scaleGestureDetector.setQuickScaleEnabled(true);
         }
 
@@ -199,12 +216,77 @@ class TouchManager {
 
     @TargetApi(Build.VERSION_CODES.FROYO)
     public void onEvent(MotionEvent event) {
-        scaleGestureDetector.onTouchEvent(event);
-        gestureDetector.onTouchEvent(event);
-
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                onDown(event);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                onMove(event);
+                break;
+        }
         if (isUpAction(event.getActionMasked())) {
             ensureInsideViewport();
         }
+
+    }
+
+    private void onDown(MotionEvent e) {
+        mLastX = e.getX();
+        mLastY = e.getY();
+        checkTouchArea(e.getX(), e.getY());
+        if (mTouchArea == TouchArea.OTHER) {
+            scaleGestureDetector.onTouchEvent(e);
+            gestureDetector.onTouchEvent(e);
+        }
+    }
+
+    private void onMove(MotionEvent e) {
+        float diffX = e.getX() - mLastX;
+        float diffY = e.getY() - mLastY;
+        switch (mTouchArea) {
+            case OTHER:
+                scaleGestureDetector.onTouchEvent(e);
+                gestureDetector.onTouchEvent(e);
+                break;
+            case LEFT_TOP:
+                break;
+            case RIGHT_TOP:
+                break;
+            case LEFT_BOTTOM:
+                break;
+            case RIGHT_BOTTOM:
+                moveHandleRB(diffX, diffY);
+                setLimits();
+                break;
+        }
+        imageView.invalidate();
+        mLastX = e.getX();
+        mLastY = e.getY();
+    }
+
+    private void moveHandleRB(float diffX, float diffY) {
+        frameRect.bottom = Math.min((int) Math.max(frameRect.bottom + diffY, viewMinHeight), height);
+        frameRect.right = Math.min((int) Math.max(frameRect.right + diffX, viewMinWidth), width);
+    }
+
+    private void checkTouchArea(float x, float y) {
+        if (isInsideCornerLeftTop(x, y)) {
+            mTouchArea = TouchArea.LEFT_TOP;
+            return;
+        }
+        if (isInsideCornerRightTop(x, y)) {
+            mTouchArea = TouchArea.RIGHT_TOP;
+            return;
+        }
+        if (isInsideCornerLeftBottom(x, y)) {
+            mTouchArea = TouchArea.LEFT_BOTTOM;
+            return;
+        }
+        if (isInsideCornerRightBottom(x, y)) {
+            mTouchArea = TouchArea.RIGHT_BOTTOM;
+            return;
+        }
+        mTouchArea = TouchArea.OTHER;
     }
 
     public void applyPositioningAndScale(Matrix matrix) {
@@ -218,6 +300,8 @@ class TouchManager {
         imageBounds = new Rect(0, 0, availableWidth / 2, availableHeight / 2);
         setViewport(bitmapWidth, bitmapHeight, availableWidth, availableHeight);
 
+        this.width = availableWidth;
+        this.height = availableHeight;
         this.bitmapWidth = bitmapWidth;
         this.bitmapHeight = bitmapHeight;
         if (bitmapWidth > 0 && bitmapHeight > 0) {
@@ -229,11 +313,11 @@ class TouchManager {
     }
 
     public int getViewportWidth() {
-        return viewportWidth;
+        return (int) (frameRect.right - frameRect.left);
     }
 
     public int getViewportHeight() {
-        return viewportHeight;
+        return (int) (frameRect.bottom - frameRect.top);
     }
 
     public float getAspectRatio() {
@@ -256,10 +340,9 @@ class TouchManager {
         newX = -(newX - x0);
 
         float newY = coordinate.getY() * targetScale;
-        if(newY > y0) {
+        if (newY > y0) {
             newY = -(newY - y0);
-        }
-        else {
+        } else {
             newY = y0 - newY;
         }
 
@@ -273,20 +356,20 @@ class TouchManager {
 
         float newY = position.getY();
         int bottom = imageBounds.bottom;
-
-
-        if (bottom - newY >= verticalLimit) {
-            newY = bottom - verticalLimit;
-        } else if (newY - bottom >= verticalLimit) {
-            newY = bottom + verticalLimit;
+        int diffVerticalCenter = (int) (height / 2 - (frameRect.top + getViewportHeight() / 2));
+        if (bottom - newY >= verticalLimit + diffVerticalCenter) { //bottom
+            newY = bottom - (verticalLimit + diffVerticalCenter);
+        } else if (newY - bottom >= verticalLimit - diffVerticalCenter) { //top
+            newY = bottom + (verticalLimit - diffVerticalCenter);
         }
 
         float newX = position.getX();
         int right = imageBounds.right;
-        if (newX <= right - horizontalLimit) {
-            newX = right - horizontalLimit;
-        } else if (newX > right + horizontalLimit) {
-            newX = right + horizontalLimit;
+        int diffHorizontalCenter = (int) (width / 2 - (frameRect.left + getViewportWidth() / 2));
+        if (newX <= right - (horizontalLimit + diffHorizontalCenter)) { //right
+            newX = right - (horizontalLimit + diffHorizontalCenter);
+        } else if (newX > right + (horizontalLimit - diffHorizontalCenter)) { //left
+            newX = right + (horizontalLimit - diffHorizontalCenter);
         }
 
         position.set(newX, newY);
@@ -311,11 +394,12 @@ class TouchManager {
             viewportHeight = availableHeight - cropViewConfig.getViewportOverlayPadding() * 2;
             viewportWidth = (int) (viewportHeight * ratio);
         }
+        calFrameRect();
     }
 
     private void setLimits() {
-        horizontalLimit = computeLimit((int) (bitmapWidth * scale), viewportWidth);
-        verticalLimit = computeLimit((int) (bitmapHeight * scale), viewportHeight);
+        horizontalLimit = computeLimit((int) (bitmapWidth * scale), getViewportWidth());
+        verticalLimit = computeLimit((int) (bitmapHeight * scale), getViewportHeight());
     }
 
     private void resetPosition() {
@@ -341,16 +425,67 @@ class TouchManager {
         return actionMasked == MotionEvent.ACTION_POINTER_UP || actionMasked == MotionEvent.ACTION_UP;
     }
 
+    private boolean isInsideCornerLeftTop(float x, float y) {
+        RectF frameRect = getFrameRect();
+        float dx = x - frameRect.left;
+        float dy = y - frameRect.top;
+        float d = dx * dx + dy * dy;
+        return sq(16 + 16) >= d;
+    }
+
+    private boolean isInsideCornerRightTop(float x, float y) {
+        RectF frameRect = getFrameRect();
+        float dx = x - frameRect.right;
+        float dy = y - frameRect.top;
+        float d = dx * dx + dy * dy;
+        return sq(16 + 16) >= d;
+    }
+
+    private boolean isInsideCornerLeftBottom(float x, float y) {
+        RectF frameRect = getFrameRect();
+        float dx = x - frameRect.left;
+        float dy = y - frameRect.bottom;
+        float d = dx * dx + dy * dy;
+        return sq(16 + 16) >= d;
+    }
+
+    private boolean isInsideCornerRightBottom(float x, float y) {
+        RectF frameRect = getFrameRect();
+        float dx = x - frameRect.right;
+        float dy = y - frameRect.bottom;
+        float d = dx * dx + dy * dy;
+        return sq(16 + 16) >= d;
+    }
+
+    private void calFrameRect() {
+        final int left = (width - viewportWidth) / 2;
+        final int right = width - left;
+        final int top = (height - viewportHeight) / 2;
+        final int bottom = height - top;
+        frameRect = new RectF(left, top, right, bottom);
+    }
+
+    public RectF getFrameRect() {
+        return frameRect;
+    }
+
+    private float sq(float value) {
+        return value * value;
+    }
+
     private static class GestureAnimator {
         @IntDef({ANIMATION_X, ANIMATION_Y, ANIMATION_SCALE})
         @Retention(RetentionPolicy.SOURCE)
-        public @interface AnimationType {}
+        public @interface AnimationType {
+        }
+
         public static final int ANIMATION_X = 0;
         public static final int ANIMATION_Y = 1;
         public static final int ANIMATION_SCALE = 2;
 
         interface OnAnimationUpdateListener {
             void onAnimationUpdate(@AnimationType int animationType, float animationValue);
+
             void onAnimationFinished();
         }
 
@@ -371,13 +506,11 @@ class TouchManager {
             public void onAnimationUpdate(ValueAnimator animation) {
                 float val = ((float) animation.getAnimatedValue());
 
-                if(animation == xAnimator) {
+                if (animation == xAnimator) {
                     listener.onAnimationUpdate(ANIMATION_X, val);
-                }
-                else if(animation == yAnimator) {
+                } else if (animation == yAnimator) {
                     listener.onAnimationUpdate(ANIMATION_Y, val);
-                }
-                else if(animation == scaleAnimator) {
+                } else if (animation == scaleAnimator) {
                     listener.onAnimationUpdate(ANIMATION_SCALE, val);
                 }
             }
@@ -386,16 +519,16 @@ class TouchManager {
         private final Animator.AnimatorListener animatorListener = new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                if(xAnimator != null) xAnimator.removeUpdateListener(updateListener);
-                if(yAnimator != null) yAnimator.removeUpdateListener(updateListener);
-                if(scaleAnimator != null) scaleAnimator.removeUpdateListener(updateListener);
+                if (xAnimator != null) xAnimator.removeUpdateListener(updateListener);
+                if (yAnimator != null) yAnimator.removeUpdateListener(updateListener);
+                if (scaleAnimator != null) scaleAnimator.removeUpdateListener(updateListener);
                 animator.removeAllListeners();
                 listener.onAnimationFinished();
             }
         };
 
         public void animateTranslation(float fromX, float toX, float fromY, float toY) {
-            if(animator != null) {
+            if (animator != null) {
                 animator.cancel();
             }
 
@@ -410,7 +543,7 @@ class TouchManager {
         }
 
         public void animateDoubleTap(float fromX, float toX, float fromY, float toY, float fromScale, float toScale) {
-            if(animator != null) {
+            if (animator != null) {
                 animator.cancel();
             }
 
@@ -431,7 +564,7 @@ class TouchManager {
             animator.setInterpolator(interpolator);
             animator.addListener(animatorListener);
             AnimatorSet.Builder builder = animator.play(first);
-            for(ValueAnimator valueAnimator : animators) {
+            for (ValueAnimator valueAnimator : animators) {
                 builder.with(valueAnimator);
             }
             animator.start();

@@ -21,21 +21,22 @@ import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
+
+import com.lyft.android.scissors2.CropView;
+
+import java.io.File;
+import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
-import com.lyft.android.scissors2.CropView;
-import com.squareup.leakcanary.RefWatcher;
-import java.io.File;
-import java.util.List;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
@@ -86,7 +87,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
@@ -161,9 +162,6 @@ public class MainActivity extends Activity {
 
         subscriptions.unsubscribe();
 
-        RefWatcher refWatcher = App.getRefWatcher(this);
-        refWatcher.watch(this, "MainActivity");
-        refWatcher.watch(cropView, "cropView");
     }
 
     @OnTouch(R.id.crop_view)

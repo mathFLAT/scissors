@@ -16,24 +16,15 @@
 package com.lyft.android.scissorssample;
 
 import android.app.Application;
-import android.content.Context;
 import android.os.StrictMode;
-import com.squareup.leakcanary.LeakCanary;
-import com.squareup.leakcanary.RefWatcher;
 
 public class App extends Application {
 
-    public static RefWatcher getRefWatcher(Context context) {
-        App application = (App) context.getApplicationContext();
-        return application.refWatcher;
-    }
 
-    private RefWatcher refWatcher;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        refWatcher = LeakCanary.install(this);
 
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                 .detectDiskReads()
