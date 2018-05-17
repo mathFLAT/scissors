@@ -19,9 +19,11 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
+
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Transformation;
+
 import java.io.File;
 
 /**
@@ -57,13 +59,12 @@ public class PicassoBitmapLoader implements BitmapLoader {
         }
 
         requestCreator
-                .skipMemoryCache()
                 .transform(transformation)
                 .into(imageView);
     }
 
     public static BitmapLoader createUsing(CropView cropView) {
-        return createUsing(cropView, Picasso.with(cropView.getContext()));
+        return createUsing(cropView, Picasso.get());
     }
 
     public static BitmapLoader createUsing(CropView cropView, Picasso picasso) {

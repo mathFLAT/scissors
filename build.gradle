@@ -1,10 +1,15 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'com.android.tools.build:gradle:3.1.2'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
     }
 }
 
@@ -14,19 +19,23 @@ allprojects {
         maven {
             url "https://maven.google.com"
         }
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
 }
 
 ext {
     minSdkVersion = 14
-    compileSdkVersion = 24
-    buildToolsVersion = '24.0.3'
+    compileSdkVersion = 27
+    buildToolsVersion = '27.0.3'
 
     junitVersion = '4.12'
     mockitoVersion = '1.10.19'
     robolectricVersion = '3.0'
     assertjVersion = '1.7.1'
-    supportVersion = '24.2.1'
+    supportVersion = '27.1.0'
 
     ci = 'true'.equals(System.getenv('CI'))
 }

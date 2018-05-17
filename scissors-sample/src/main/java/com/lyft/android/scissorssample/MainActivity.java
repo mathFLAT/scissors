@@ -33,34 +33,35 @@ import com.lyft.android.scissors2.CropView;
 import java.io.File;
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
+import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
-import rx.Observable;
-import rx.functions.Action1;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Completable;
+import io.reactivex.CompletableObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
-import static android.graphics.Bitmap.CompressFormat.JPEG;
-import static rx.android.schedulers.AndroidSchedulers.mainThread;
-import static rx.schedulers.Schedulers.io;
+import static android.graphics.Bitmap.CompressFormat.PNG;
 
 public class MainActivity extends Activity {
 
-    private static final float[] ASPECT_RATIOS = { 0f, 1f, 6f/4f, 16f/9f };
+    private static final float[] ASPECT_RATIOS = {0f, 1f, 6f / 4f, 16f / 9f};
 
-    private static final String[] ASPECT_LABELS = { "\u00D8", "1:1", "6:4", "16:9" };
+    private static final String[] ASPECT_LABELS = {"\u00D8", "1:1", "6:4", "16:9"};
 
-    @Bind(R.id.crop_view)
+    @BindView(R.id.crop_view)
     CropView cropView;
 
-    @Bind({ R.id.crop_fab, R.id.pick_mini_fab, R.id.ratio_fab })
+
+    @BindViews({R.id.crop_fab, R.id.pick_mini_fab, R.id.ratio_fab})
     List<View> buttons;
 
-    @Bind(R.id.pick_fab)
+    @BindView(R.id.pick_fab)
     View pickButton;
 
-    CompositeSubscription subscriptions = new CompositeSubscription();
 
     private int selectedRatio = 0;
     private AnimatorListener animatorListener = new AnimatorListener() {
@@ -112,24 +113,31 @@ public class MainActivity extends Activity {
     public void onCropClicked() {
         final File croppedFile = new File(getCacheDir(), "cropped.jpg");
 
-        Observable<Void> onSave = Observable.from(cropView.extensions()
-                .crop()
-                .quality(100)
-                .format(JPEG)
-                .into(croppedFile))
-                .subscribeOn(io())
-                .observeOn(mainThread());
 
-        subscriptions.add(onSave
-                .subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void nothing) {
-                        CropResultActivity.startUsing(croppedFile, MainActivity.this);
-                    }
-                }));
+        Completable onSave = Completable.fromFuture(cropView.extensions().crop().quality(100).format(PNG).into(croppedFile))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+
+
+        onSave.subscribe(new CompletableObserver() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onComplete() {
+                CropResultActivity.startUsing(croppedFile, MainActivity.this);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+        });
     }
 
-    @OnClick({ R.id.pick_fab, R.id.pick_mini_fab })
+    @OnClick({R.id.pick_fab, R.id.pick_mini_fab})
     public void onPickClicked() {
         cropView.extensions()
                 .pickUsing(this, RequestCodes.PICK_IMAGE_FROM_GALLERY);
@@ -159,9 +167,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        subscriptions.unsubscribe();
-
     }
 
     @OnTouch(R.id.crop_view)
