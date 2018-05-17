@@ -265,8 +265,8 @@ class TouchManager {
     }
 
     private void moveHandleRB(float diffX, float diffY) {
-        frameRect.bottom = Math.min((int) Math.max(frameRect.bottom + diffY, viewMinHeight), height);
-        frameRect.right = Math.min((int) Math.max(frameRect.right + diffX, viewMinWidth), width);
+        frameRect.bottom = Math.min((int) Math.max(frameRect.bottom + diffY, viewMinHeight), viewportHeight);
+        frameRect.right = Math.min((int) Math.max(frameRect.right + diffX, viewMinWidth), viewportWidth);
     }
 
     private void checkTouchArea(float x, float y) {
@@ -312,9 +312,7 @@ class TouchManager {
         }
     }
 
-    public int getViewportWidth() {
-        return (int) (frameRect.right - frameRect.left);
-    }
+    public int getViewportWidth() { return (int) (frameRect.right - frameRect.left); }
 
     public int getViewportHeight() {
         return (int) (frameRect.bottom - frameRect.top);
@@ -458,10 +456,13 @@ class TouchManager {
     }
 
     private void calFrameRect() {
-        final int left = (width - viewportWidth) / 2;
+//        final int left = (width - viewportWidth) / 2;
+        final int left = 0;
         final int right = width - left;
-        final int top = (height - viewportHeight) / 2;
-        final int bottom = height - top;
+//        final int top = (height - viewportHeight) / 2;
+        final int top = 0;
+//        final int bottom = height - top;
+        final int bottom = viewportHeight;
         frameRect = new RectF(left, top, right, bottom);
     }
 
