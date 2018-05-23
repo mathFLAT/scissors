@@ -59,6 +59,9 @@ public class CropView extends ImageView {
     private Matrix transform = new Matrix();
     private Extensions extensions;
 
+    private HandleSizeChangeListener listener = null;
+
+
     /**
      * Corresponds to the values in {@link com.lyft.android.scissors2.R.attr#cropviewShape}
      */
@@ -149,6 +152,8 @@ public class CropView extends ImageView {
         canvas.drawLine(frameRect.left, frameRect.bottom, frameRect.right, frameRect.bottom, paint);
         canvas.drawLine(frameRect.left, frameRect.top, frameRect.left, frameRect.bottom, paint);
         canvas.drawLine(frameRect.right, frameRect.top, frameRect.right, frameRect.bottom, paint);
+
+        if (listener != null) listener.onChange(frameRect.width(), frameRect.height());
     }
 
     private void drawOvalOverlay(Canvas canvas) {
@@ -404,6 +409,10 @@ public class CropView extends ImageView {
         return transform;
     }
 
+    public void setHandleSizeChangeListener(HandleSizeChangeListener listener) {
+        this.listener = listener;
+    }
+
     /**
      * Optional extensions to perform common actions involving a {@link CropView}
      */
@@ -486,5 +495,8 @@ public class CropView extends ImageView {
         }
     }
 
+    public interface HandleSizeChangeListener {
+        void onChange(float width, float height);
+    }
 
 }

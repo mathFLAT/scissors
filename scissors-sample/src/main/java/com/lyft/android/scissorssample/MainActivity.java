@@ -92,6 +92,12 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
+
+        cropView.setHandleSizeChangeListener(new CropView.HandleSizeChangeListener() {
+            @Override
+            public void onChange(float width, float height) {
+            }
+        });
     }
 
     @Override
