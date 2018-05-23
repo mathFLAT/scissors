@@ -1,6 +1,16 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+    }
+}
+
+apply plugin: 'com.github.dcendents.android-maven'
 group = 'com.github.sangcomz'
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -39,4 +49,3 @@ dependencies {
     provided "com.android.support:support-v4:$rootProject.ext.supportVersion"
 }
 
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
