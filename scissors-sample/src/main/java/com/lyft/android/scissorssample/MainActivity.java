@@ -94,6 +94,7 @@ public class MainActivity extends Activity {
         cropView.setHandleSizeChangeListener(new CropView.HandleSizeChangeListener() {
             @Override
             public void onChange(float width, float height) {
+                System.out.println("width, height :::: " + width +", " + height);
             }
         });
     }
