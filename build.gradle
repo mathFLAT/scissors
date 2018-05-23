@@ -1,27 +1,20 @@
 buildscript {
     repositories {
         jcenter()
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
+        google()
+
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.2'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
     }
 }
 
 allprojects {
     repositories {
         jcenter()
-        maven {
-            url "https://maven.google.com"
-        }
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
+        google()
     }
 }
 
@@ -37,4 +30,8 @@ ext {
     supportVersion = '27.1.1'
 
     ci = 'true' == System.getenv('CI')
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }

@@ -1,15 +1,7 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-    }
-}
-
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
 apply plugin: 'com.github.dcendents.android-maven'
+
 group = 'com.github.sangcomz'
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
