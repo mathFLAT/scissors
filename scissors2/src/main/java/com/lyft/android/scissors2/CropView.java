@@ -143,10 +143,10 @@ public class CropView extends ImageView {
         paint.setColor(Color.RED);
         final RectF frameRect = touchManager.getFrameRect();
 
-        canvas.drawCircle(frameRect.left, frameRect.top, 16, paint);
-        canvas.drawCircle(frameRect.right, frameRect.top, 16, paint);
-        canvas.drawCircle(frameRect.left, frameRect.bottom, 16, paint);
-        canvas.drawCircle(frameRect.right, frameRect.bottom, 16, paint);
+//        canvas.drawCircle(frameRect.left, frameRect.top, 16, paint);
+//        canvas.drawCircle(frameRect.right, frameRect.top, 16, paint);
+//        canvas.drawCircle(frameRect.left, frameRect.bottom, 16, paint);
+        canvas.drawCircle(frameRect.right - 16, frameRect.bottom, 16, paint);
 
         canvas.drawLine(frameRect.left, frameRect.top, frameRect.right, frameRect.top, paint);
         canvas.drawLine(frameRect.left, frameRect.bottom, frameRect.right, frameRect.bottom, paint);
@@ -273,6 +273,19 @@ public class CropView extends ImageView {
         }
         touchManager.setAspectRatio(ratio);
         resetTouchManager();
+        invalidate();
+    }
+
+    public void setViewportWidth(int width) {
+        setViewportSize(width, touchManager.getViewportHeight());
+    }
+
+    public void setViewportHeight(int height) {
+        setViewportSize(touchManager.getViewportWidth(), height);
+    }
+
+    public void setViewportSize(int width, int height) {
+        touchManager.setFrameRectSize(width, height);
         invalidate();
     }
 

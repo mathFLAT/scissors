@@ -312,7 +312,9 @@ class TouchManager {
         }
     }
 
-    public int getViewportWidth() { return (int) (frameRect.right - frameRect.left); }
+    public int getViewportWidth() {
+        return (int) (frameRect.right - frameRect.left);
+    }
 
     public int getViewportHeight() {
         return (int) (frameRect.bottom - frameRect.top);
@@ -456,15 +458,21 @@ class TouchManager {
     }
 
     private void calFrameRect() {
-//        final int left = (width - viewportWidth) / 2;
         final int left = 0;
         final int right = width - left;
-//        final int top = (height - viewportHeight) / 2;
         final int top = 0;
-//        final int bottom = height - top;
         final int bottom = viewportHeight;
         frameRect = new RectF(left, top, right, bottom);
     }
+
+    public void setFrameRectSize(int width, int height) {
+        final int left = 0;
+        final int right = width - left;
+        final int top = 0;
+        final int bottom = height;
+        frameRect = new RectF(left, top, right, bottom);
+    }
+
 
     public RectF getFrameRect() {
         return frameRect;

@@ -62,7 +62,8 @@ public class MainActivity extends Activity {
     @BindView(R.id.pick_fab)
     View pickButton;
 
-
+    @BindView(R.id.v_line)
+    View vLine;
     private int selectedRatio = 0;
     private AnimatorListener animatorListener = new AnimatorListener() {
         @Override
@@ -94,9 +95,13 @@ public class MainActivity extends Activity {
         cropView.setHandleSizeChangeListener(new CropView.HandleSizeChangeListener() {
             @Override
             public void onChange(float width, float height) {
-                System.out.println("width, height :::: " + width +", " + height);
+                vLine.setY(height);
+                System.out.println("width, height :::: " + width + ", " + height);
             }
         });
+
+
+
     }
 
     @Override
