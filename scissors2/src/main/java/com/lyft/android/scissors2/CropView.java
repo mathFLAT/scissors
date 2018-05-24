@@ -146,7 +146,7 @@ public class CropView extends ImageView {
 //        canvas.drawCircle(frameRect.left, frameRect.top, 16, paint);
 //        canvas.drawCircle(frameRect.right, frameRect.top, 16, paint);
 //        canvas.drawCircle(frameRect.left, frameRect.bottom, 16, paint);
-        canvas.drawCircle(frameRect.right - 16, frameRect.bottom, 16, paint);
+        canvas.drawCircle(frameRect.right, frameRect.bottom, 16, paint);
 
         canvas.drawLine(frameRect.left, frameRect.top, frameRect.right, frameRect.top, paint);
         canvas.drawLine(frameRect.left, frameRect.bottom, frameRect.right, frameRect.bottom, paint);
