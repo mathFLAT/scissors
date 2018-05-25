@@ -312,6 +312,21 @@ class TouchManager {
         }
     }
 
+    public void changeFor(int bitmapWidth, int bitmapHeight, int availableWidth, int availableHeight) {
+        aspectRatio = cropViewConfig.getViewportRatio();
+        imageBounds = new Rect(0, 0, availableWidth / 2, availableHeight / 2);
+
+        this.width = availableWidth;
+        this.height = availableHeight;
+        this.bitmapWidth = bitmapWidth;
+        this.bitmapHeight = bitmapHeight;
+        if (bitmapWidth > 0 && bitmapHeight > 0) {
+            setMinimumScale();
+            setLimits();
+            ensureInsideViewport();
+        }
+    }
+
     public int getViewportWidth() {
         return (int) (frameRect.right - frameRect.left);
     }

@@ -324,6 +324,12 @@ public class CropView extends ImageView {
         invalidate();
     }
 
+    public void changeImageBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
+        changeTouchManager();
+        invalidate();
+    }
+
     /**
      * @return Current working Bitmap or <code>null</code> if none has been set yet.
      */
@@ -337,6 +343,13 @@ public class CropView extends ImageView {
         final int bitmapWidth = invalidBitmap ? 0 : bitmap.getWidth();
         final int bitmapHeight = invalidBitmap ? 0 : bitmap.getHeight();
         touchManager.resetFor(bitmapWidth, bitmapHeight, getWidth(), getHeight());
+    }
+
+    private void changeTouchManager() {
+        final boolean invalidBitmap = bitmap == null;
+        final int bitmapWidth = invalidBitmap ? 0 : bitmap.getWidth();
+        final int bitmapHeight = invalidBitmap ? 0 : bitmap.getHeight();
+        touchManager.changeFor(bitmapWidth, bitmapHeight, getWidth(), getHeight());
     }
 
     @Override
