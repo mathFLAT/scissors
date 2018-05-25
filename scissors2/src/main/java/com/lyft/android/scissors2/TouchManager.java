@@ -566,6 +566,18 @@ class TouchManager {
         frameRect = new RectF(left, top, right, bottom);
     }
 
+    public void setMinFrameRect() {
+        frameRect = new RectF(0, 0, viewMinWidth, viewMinHeight);
+        setLimits();
+        ensureInsideViewport();
+    }
+
+    public void setMaxFrameRect() {
+        frameRect = new RectF(0, 0, viewportWidth, viewportHeight);
+        setLimits();
+        ensureInsideViewport();
+    }
+
 
     public RectF getFrameRect() {
         return frameRect;

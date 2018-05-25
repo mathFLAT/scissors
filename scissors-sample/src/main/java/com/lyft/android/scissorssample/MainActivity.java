@@ -26,11 +26,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import com.lyft.android.scissors2.CropView;
 
-import java.io.File;
 import java.util.List;
 
 import butterknife.BindView;
@@ -38,13 +36,6 @@ import butterknife.BindViews;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
-import io.reactivex.Completable;
-import io.reactivex.CompletableObserver;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
-
-import static android.graphics.Bitmap.CompressFormat.PNG;
 
 public class MainActivity extends Activity {
 
@@ -121,30 +112,33 @@ public class MainActivity extends Activity {
 
     @OnClick(R.id.crop_fab)
     public void onCropClicked() {
-        final File croppedFile = new File(getCacheDir(), "cropped.jpg");
+//        final File croppedFile = new File(getCacheDir(), "cropped.jpg");
+//
+//
+//        Completable onSave = Completable.fromFuture(cropView.extensions().crop().quality(100).format(PNG).into(croppedFile))
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread());
+//
+//
+//        onSave.subscribe(new CompletableObserver() {
+//            @Override
+//            public void onSubscribe(Disposable d) {
+//
+//            }
+//
+//            @Override
+//            public void onComplete() {
+//                CropResultActivity.startUsing(croppedFile, MainActivity.this);
+//            }
+//
+//            @Override
+//            public void onError(Throwable e) {
+//
+//            }
+//        });
 
+        cropView.setMinViewport();
 
-        Completable onSave = Completable.fromFuture(cropView.extensions().crop().quality(100).format(PNG).into(croppedFile))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-
-
-        onSave.subscribe(new CompletableObserver() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
-            }
-
-            @Override
-            public void onComplete() {
-                CropResultActivity.startUsing(croppedFile, MainActivity.this);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-        });
     }
 
     @OnClick({R.id.pick_fab, R.id.pick_mini_fab})
@@ -155,23 +149,25 @@ public class MainActivity extends Activity {
 
     @OnClick(R.id.ratio_fab)
     public void onRatioClicked() {
-        final float oldRatio = cropView.getImageRatio();
-        selectedRatio = (selectedRatio + 1) % ASPECT_RATIOS.length;
+//        final float oldRatio = cropView.getImageRatio();
+//        selectedRatio = (selectedRatio + 1) % ASPECT_RATIOS.length;
+//
+//        // Since the animation needs to interpolate to the native
+//        // ratio, we need to get that instead of using 0
+//        float newRatio = ASPECT_RATIOS[selectedRatio];
+//        if (Float.compare(0, newRatio) == 0) {
+//            newRatio = cropView.getImageRatio();
+//        }
+//
+//        ObjectAnimator viewportRatioAnimator = ObjectAnimator.ofFloat(cropView, "viewportRatio", oldRatio, newRatio)
+//                .setDuration(420);
+//        autoCancel(viewportRatioAnimator);
+//        viewportRatioAnimator.addListener(animatorListener);
+//        viewportRatioAnimator.start();
+//
+//        Toast.makeText(this, ASPECT_LABELS[selectedRatio], Toast.LENGTH_SHORT).show();
 
-        // Since the animation needs to interpolate to the native
-        // ratio, we need to get that instead of using 0
-        float newRatio = ASPECT_RATIOS[selectedRatio];
-        if (Float.compare(0, newRatio) == 0) {
-            newRatio = cropView.getImageRatio();
-        }
-
-        ObjectAnimator viewportRatioAnimator = ObjectAnimator.ofFloat(cropView, "viewportRatio", oldRatio, newRatio)
-                .setDuration(420);
-        autoCancel(viewportRatioAnimator);
-        viewportRatioAnimator.addListener(animatorListener);
-        viewportRatioAnimator.start();
-
-        Toast.makeText(this, ASPECT_LABELS[selectedRatio], Toast.LENGTH_SHORT).show();
+        cropView.setMaxViewport();
     }
 
     @Override

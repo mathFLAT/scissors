@@ -293,6 +293,15 @@ public class CropView extends ImageView {
         invalidate();
     }
 
+    public void setMinViewport(){
+        touchManager.setMinFrameRect();
+        invalidate();
+    }
+
+    public void setMaxViewport(){
+        touchManager.setMaxFrameRect();
+        invalidate();
+    }
     @Override
     public void setImageResource(@DrawableRes int resId) {
         final Bitmap bitmap = resId > 0
