@@ -335,6 +335,11 @@ class TouchManager {
         matrix.postTranslate(position.getX(), position.getY());
     }
 
+    public void applyScale(Matrix matrix, float scale) {
+        this.scale = scale;
+        matrix.postScale(scale, scale);
+    }
+
     public void resetFor(int bitmapWidth, int bitmapHeight, int availableWidth, int availableHeight) {
         aspectRatio = cropViewConfig.getViewportRatio();
         imageBounds = new Rect(0, 0, availableWidth / 2, availableHeight / 2);

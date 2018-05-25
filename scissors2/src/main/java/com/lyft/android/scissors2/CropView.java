@@ -125,6 +125,10 @@ public class CropView extends ImageView {
         canvas.drawBitmap(bitmap, transform, bitmapPaint);
     }
 
+    public void postScale(float scale) {
+        touchManager.applyScale(transform, scale);
+    }
+
     private void drawSquareOverlay(Canvas canvas) {
         final RectF frameRect = touchManager.getFrameRect();
 

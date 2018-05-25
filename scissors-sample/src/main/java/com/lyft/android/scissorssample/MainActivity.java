@@ -101,7 +101,6 @@ public class MainActivity extends Activity {
         });
 
 
-
     }
 
     @Override
@@ -115,6 +114,7 @@ public class MainActivity extends Activity {
             cropView.extensions()
                     .load(galleryPictureUri);
 
+            cropView.postScale(1.2f);
             updateButtons();
         }
     }
