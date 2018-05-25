@@ -40,7 +40,7 @@ import java.lang.annotation.RetentionPolicy;
 class TouchManager {
 
     private enum TouchArea {
-        OTHER, LEFT_TOP, RIGHT_TOP, LEFT_BOTTOM, RIGHT_BOTTOM
+        OTHER, LEFT_TOP, RIGHT_TOP, LEFT_BOTTOM, RIGHT_BOTTOM, LEFT, RIGHT, TOP, BOTTOM
     }
 
     private static final int MINIMUM_FLING_VELOCITY = 2500;
@@ -258,6 +258,18 @@ class TouchManager {
                 moveHandleRB(diffX, diffY);
                 setLimits();
                 break;
+            case TOP:
+                break;
+            case RIGHT:
+                moveHandleR(diffX);
+                setLimits();
+                break;
+            case LEFT:
+                break;
+            case BOTTOM:
+                moveHandleB(diffY);
+                setLimits();
+                break;
         }
         imageView.invalidate();
         mLastX = e.getX();
@@ -267,6 +279,14 @@ class TouchManager {
     private void moveHandleRB(float diffX, float diffY) {
         frameRect.bottom = Math.min((int) Math.max(frameRect.bottom + diffY, viewMinHeight), viewportHeight);
         frameRect.right = Math.min((int) Math.max(frameRect.right + diffX, viewMinWidth), viewportWidth);
+    }
+
+    private void moveHandleR(float diffX) {
+        frameRect.right = Math.min((int) Math.max(frameRect.right + diffX, viewMinWidth), viewportWidth);
+    }
+
+    private void moveHandleB(float diffY) {
+        frameRect.bottom = Math.min((int) Math.max(frameRect.bottom + diffY, viewMinHeight), viewportHeight);
     }
 
     private void checkTouchArea(float x, float y) {
@@ -284,6 +304,26 @@ class TouchManager {
         }
         if (isInsideCornerRightBottom(x, y)) {
             mTouchArea = TouchArea.RIGHT_BOTTOM;
+            return;
+        }
+
+        if (isInsideLeft(x, y)) {
+            mTouchArea = TouchArea.LEFT;
+            return;
+        }
+
+        if (isInsideRight(x, y)) {
+            mTouchArea = TouchArea.RIGHT;
+            return;
+        }
+
+        if (isInsideTop(x, y)) {
+            mTouchArea = TouchArea.TOP;
+            return;
+        }
+
+        if (isInsideBottom(x, y)) {
+            mTouchArea = TouchArea.BOTTOM;
             return;
         }
         mTouchArea = TouchArea.OTHER;
@@ -440,12 +480,45 @@ class TouchManager {
         return actionMasked == MotionEvent.ACTION_POINTER_UP || actionMasked == MotionEvent.ACTION_UP;
     }
 
+    private boolean isInsideLeft(float x, float y) {
+        RectF frameRect = getFrameRect();
+        float dx = x - frameRect.left;
+        float dy = y - frameRect.bottom / 2;
+        float d = dx * dx + dy * dy;
+        return sq(16 + 24) >= d; //radius + padding
+    }
+
+    private boolean isInsideTop(float x, float y) {
+        RectF frameRect = getFrameRect();
+        float dx = x - frameRect.right / 2;
+        float dy = y - frameRect.top;
+        float d = dx * dx + dy * dy;
+        return sq(16 + 24) >= d; //radius + padding
+    }
+
+    private boolean isInsideRight(float x, float y) {
+        RectF frameRect = getFrameRect();
+        float dx = x - frameRect.right;
+        float dy = y - frameRect.bottom / 2;
+        float d = dx * dx + dy * dy;
+        return sq(16 + 24) >= d; //radius + padding
+    }
+
+    private boolean isInsideBottom(float x, float y) {
+        RectF frameRect = getFrameRect();
+        float dx = x - frameRect.right / 2;
+        float dy = y - frameRect.bottom;
+        float d = dx * dx + dy * dy;
+        return sq(16 + 24) >= d; //radius + padding
+    }
+
+
     private boolean isInsideCornerLeftTop(float x, float y) {
         RectF frameRect = getFrameRect();
         float dx = x - frameRect.left;
         float dy = y - frameRect.top;
         float d = dx * dx + dy * dy;
-        return sq(16 + 16) >= d;
+        return sq(16 + 24) >= d; //radius + padding
     }
 
     private boolean isInsideCornerRightTop(float x, float y) {
@@ -453,7 +526,7 @@ class TouchManager {
         float dx = x - frameRect.right;
         float dy = y - frameRect.top;
         float d = dx * dx + dy * dy;
-        return sq(16 + 16) >= d;
+        return sq(16 + 24) >= d;
     }
 
     private boolean isInsideCornerLeftBottom(float x, float y) {
@@ -461,7 +534,7 @@ class TouchManager {
         float dx = x - frameRect.left;
         float dy = y - frameRect.bottom;
         float d = dx * dx + dy * dy;
-        return sq(16 + 16) >= d;
+        return sq(16 + 24) >= d;
     }
 
     private boolean isInsideCornerRightBottom(float x, float y) {
@@ -469,7 +542,7 @@ class TouchManager {
         float dx = x - frameRect.right;
         float dy = y - frameRect.bottom;
         float d = dx * dx + dy * dy;
-        return sq(16 + 16) >= d;
+        return sq(16 + 24) >= d;
     }
 
     private void calFrameRect() {

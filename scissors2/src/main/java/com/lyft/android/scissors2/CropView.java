@@ -143,10 +143,10 @@ public class CropView extends ImageView {
         paint.setColor(Color.RED);
         final RectF frameRect = touchManager.getFrameRect();
 
-//        canvas.drawCircle(frameRect.left, frameRect.top, 16, paint);
-//        canvas.drawCircle(frameRect.right, frameRect.top, 16, paint);
-//        canvas.drawCircle(frameRect.left, frameRect.bottom, 16, paint);
-        canvas.drawCircle(frameRect.right, frameRect.bottom, 16, paint);
+        canvas.drawCircle(frameRect.left, frameRect.bottom / 2, 16, paint); //left
+        canvas.drawCircle(frameRect.right / 2, frameRect.top, 16, paint); //top
+        canvas.drawCircle(frameRect.right, frameRect.bottom / 2, 16, paint); //right
+        canvas.drawCircle(frameRect.right / 2, frameRect.bottom, 16, paint); //bottom
 
         canvas.drawLine(frameRect.left, frameRect.top, frameRect.right, frameRect.top, paint);
         canvas.drawLine(frameRect.left, frameRect.bottom, frameRect.right, frameRect.bottom, paint);
