@@ -490,7 +490,7 @@ class TouchManager {
         float dx = x - frameRect.left;
         float dy = y - frameRect.bottom / 2;
         float d = dx * dx + dy * dy;
-        return sq(16 + 24) >= d; //radius + padding
+        return sq(8 + 24) >= d; //radius + padding
     }
 
     private boolean isInsideTop(float x, float y) {
@@ -498,7 +498,7 @@ class TouchManager {
         float dx = x - frameRect.right / 2;
         float dy = y - frameRect.top;
         float d = dx * dx + dy * dy;
-        return sq(16 + 24) >= d; //radius + padding
+        return sq(8 + 24) >= d; //radius + padding
     }
 
     private boolean isInsideRight(float x, float y) {
@@ -506,7 +506,7 @@ class TouchManager {
         float dx = x - frameRect.right;
         float dy = y - frameRect.bottom / 2;
         float d = dx * dx + dy * dy;
-        return sq(16 + 24) >= d; //radius + padding
+        return sq(8 + 24) >= d; //radius + padding
     }
 
     private boolean isInsideBottom(float x, float y) {
@@ -514,7 +514,7 @@ class TouchManager {
         float dx = x - frameRect.right / 2;
         float dy = y - frameRect.bottom;
         float d = dx * dx + dy * dy;
-        return sq(16 + 24) >= d; //radius + padding
+        return sq(8 + 24) >= d; //radius + padding
     }
 
 

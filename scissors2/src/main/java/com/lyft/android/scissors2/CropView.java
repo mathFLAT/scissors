@@ -60,6 +60,7 @@ public class CropView extends ImageView {
     private Extensions extensions;
 
     private HandleSizeChangeListener listener = null;
+    private float handleCircleRadius = 8;
 
 
     /**
@@ -140,17 +141,18 @@ public class CropView extends ImageView {
         drawHandles(canvas);
     }
 
+
     private void drawHandles(Canvas canvas) {
         Paint paint = new Paint();
         paint.setStrokeWidth(4);
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(Color.RED);
+        paint.setColor(Color.parseColor("#00c7f3"));
         final RectF frameRect = touchManager.getFrameRect();
 
-        canvas.drawCircle(frameRect.left, frameRect.bottom / 2, 16, paint); //left
-        canvas.drawCircle(frameRect.right / 2, frameRect.top, 16, paint); //top
-        canvas.drawCircle(frameRect.right, frameRect.bottom / 2, 16, paint); //right
-        canvas.drawCircle(frameRect.right / 2, frameRect.bottom, 16, paint); //bottom
+        canvas.drawCircle(frameRect.left, frameRect.bottom / 2, handleCircleRadius, paint); //left
+        canvas.drawCircle(frameRect.right / 2, frameRect.top, handleCircleRadius, paint); //top
+        canvas.drawCircle(frameRect.right, frameRect.bottom / 2, handleCircleRadius, paint); //right
+        canvas.drawCircle(frameRect.right / 2, frameRect.bottom, handleCircleRadius, paint); //bottom
 
         canvas.drawLine(frameRect.left, frameRect.top, frameRect.right, frameRect.top, paint);
         canvas.drawLine(frameRect.left, frameRect.bottom, frameRect.right, frameRect.bottom, paint);
@@ -293,15 +295,16 @@ public class CropView extends ImageView {
         invalidate();
     }
 
-    public void setMinViewport(){
+    public void setMinViewport() {
         touchManager.setMinFrameRect();
         invalidate();
     }
 
-    public void setMaxViewport(){
+    public void setMaxViewport() {
         touchManager.setMaxFrameRect();
         invalidate();
     }
+
     @Override
     public void setImageResource(@DrawableRes int resId) {
         final Bitmap bitmap = resId > 0
